@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ric-service
+spec:
+  selector:
+    app: ric-platform
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ric-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ric-platform
+  template:
+    metadata:
+      labels:
+        app: ric-platform
+    spec:
+      containers:
+      - name: ric
+        image: ric-base:v1
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh", "-c", "echo 'RIC OPERANTE.'; python -m http.server 8080"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xapp-traffic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: xapp
+  template:
+    metadata:
+      labels:
+        app: xapp
+    spec:
+      containers:
+      - name: xapp
+        image: xapp-image:v1
+        imagePullPolicy: IfNotPresent
+        command: ["python", "xapp_mock.py"]
+        env:
+        - name: RIC_HOST
+          value: "ric-service"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rapp-energy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rapp
+  template:
+    metadata:
+      labels:
+        app: rapp
+    spec:
+      containers:
+      - name: rapp
+        image: rapp-image:v1
+        imagePullPolicy: IfNotPresent
+        command: ["python", "rapp_mock.py"]
+        env:
+        - name: RIC_HOST
+          value: "ric-service"
