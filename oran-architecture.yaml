@@ -28,7 +28,8 @@ spec:
       - name: ric
         image: ric-base:v1
         imagePullPolicy: IfNotPresent
-        command: ["/bin/sh", "-c", "echo 'RIC OPERANTE.'; python -m http.server 8080"]
+        # O -u aqui garante que o log saia na hora
+        command: ["/bin/sh", "-c", "echo 'RIC OPERANTE.'; python -u -m http.server 8080"]
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -48,7 +49,7 @@ spec:
       - name: xapp
         image: xapp-image:v1
         imagePullPolicy: IfNotPresent
-        command: ["python", "xapp_mock.py"]
+        command: ["python", "-u", "xapp_mock.py"]
         env:
         - name: RIC_HOST
           value: "ric-service"
@@ -71,7 +72,8 @@ spec:
       - name: rapp
         image: rapp-image:v1
         imagePullPolicy: IfNotPresent
-        command: ["python", "rapp_mock.py"]
+        # ADICIONADO O -u ABAIXO
+        command: ["python", "-u", "rapp_mock.py"]
         env:
         - name: RIC_HOST
           value: "ric-service"
