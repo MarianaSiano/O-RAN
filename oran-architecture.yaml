@@ -76,4 +76,61 @@ spec:
         command: ["python", "-u", "rapp_mock.py"]
         env:
         - name: RIC_HOST
+          value: "ric-service"apiVersion: v1
+kind: Service
+metadata:
+  name: ric-service
+spec:
+  selector:
+    app: ric-platform
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+# --- O MESTRE (RIC) ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ric-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ric-platform
+  template:
+    metadata:
+      labels:
+        app: ric-platform
+    spec:
+      containers:
+      - name: ric
+        image: ric-image:v2
+        imagePullPolicy: IfNotPresent
+        # Executa o servidor que gera dados
+        command: ["python", "-u", "ric_server.py"]
+---
+# --- O WORKER (xApp) ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xapp-worker
+spec:
+  replicas: 1 # Se quiser ver a escalabilidade, mude para 3 aqui!
+  selector:
+    matchLabels:
+      app: xapp
+  template:
+    metadata:
+      labels:
+        app: xapp
+    spec:
+      containers:
+      - name: xapp
+        image: xapp-image:v2
+        imagePullPolicy: IfNotPresent
+        # Executa o worker que consome dados
+        command: ["python", "-u", "xapp_worker.py"]
+        env:
+        - name: RIC_HOST
           value: "ric-service"
