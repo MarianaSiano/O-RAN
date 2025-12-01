@@ -28,7 +28,6 @@ spec:
       - name: ric
         image: ric-base:v1
         imagePullPolicy: IfNotPresent
-        # O -u aqui garante que o log saia na hora
         command: ["/bin/sh", "-c", "echo 'RIC OPERANTE.'; python -u -m http.server 8080"]
 ---
 apiVersion: apps/v1
@@ -72,7 +71,6 @@ spec:
       - name: rapp
         image: rapp-image:v1
         imagePullPolicy: IfNotPresent
-        # ADICIONADO O -u ABAIXO
         command: ["python", "-u", "rapp_mock.py"]
         env:
         - name: RIC_HOST
@@ -116,7 +114,7 @@ kind: Deployment
 metadata:
   name: xapp-worker
 spec:
-  replicas: 1 # Se quiser ver a escalabilidade, mude para 3 aqui!
+  replicas: 1
   selector:
     matchLabels:
       app: xapp
