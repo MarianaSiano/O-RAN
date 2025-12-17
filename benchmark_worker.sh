@@ -27,8 +27,8 @@ do
     kubectl rollout status deployment/benchmark-worker --timeout=300s > /dev/null
 
     # Coleta de Dados
-    echo "   ... Coletando metricas (15s)..."
-    sleep 15
+    echo "   ... Coletando metricas (45s)..."
+    sleep 45
 
     # Coleta CPU/RAM (Filtra APENAS pelo label do benchmark)
     STATS=$(kubectl top pods -l app=bench-worker --no-headers 2>/dev/null | awk '{cpu+=$2; mem+=$3} END {print cpu "," mem}')
