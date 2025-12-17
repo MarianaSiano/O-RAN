@@ -1,13 +1,24 @@
 import time
 import os
+import urllib.request
+import json
 
-# Pega o endereço do RIC injetado pelo Kubernetes
 ric_host = os.getenv('RIC_HOST', 'localhost')
-
-print(f"--- INICIANDO xApp (Near-RT) ---")
-print(f"Alvo detectado (RIC): {ric_host}")
+url = f"http://{ric_host}:8080"
+print(f"--- xApp TRAFFIC STEERING INICIADO ---")
 
 while True:
-    # Simula uma decisão de controle (ex: Mudar usuário de antena)
-    print(f"[xApp] Enviando comando 'TRAFFIC STEERING' via interface E2 para {ric_host}...")
-    time.sleep(5)
+    try:
+        with urllib.request.urlopen(url, timeout=2) as response:
+            data = json . loads ( response.read().decode())
+        util = (data['load'] / data['capacity']) * 100
+        decision = "HANDOVER" if util > 100 else "KEEP"
+
+        # Enviar apenas a decisão (sem lógica de benchmark pesado)
+        report = {"id": "xapp-traffic", "decision": decision}
+        data_bytes = json.dumps(report).encode("utf-8")
+        req = urllib.request.Request(url, data=data_bytes, method="POST")
+        req.add_header('Content-Type', 'application/json')
+        with urllib.request.urlopen(req) as r: pass
+    except: pass
+    time.sleep(2) # Roda mais tranquilo
