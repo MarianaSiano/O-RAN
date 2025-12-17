@@ -11,8 +11,8 @@ kind load docker-image oran-lab:v1 --name oran-lab
 echo ">>> Aplicando arquitetura completa..."
 kubectl delete -f oran-architecture.yaml --ignore-not-found=true
 kubectl apply -f oran-architecture.yaml
-echo ">>> Aguardando start inicial (15s)..."
-sleep 15
+echo ">>> Aguardando start inicial (45s)..."
+sleep 45
 
 # 3. Loop de Teste (Afeta apenas o benchmark-worker)
 for WORKERS in 1 2 4 8 16 32 64 128
