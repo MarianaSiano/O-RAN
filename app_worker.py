@@ -2,31 +2,35 @@ import time
 import os
 import urllib.request
 import json
+import socket
 
-# Pega o endereço do RIC (Mestre)
 ric_host = os.getenv('RIC_HOST', 'localhost')
+my_id = socket.gethostname()
 url = f"http://{ric_host}:8080"
 
-print(f"--- xApp (WORKER) INICIADO ---")
-print(f"Conectando ao Mestre RIC em: {url}")
+print(f"--- APP WORKER BENCHMARK ({my_id}) ---")
 
 while True:
     try:
-        # 1. Pede os dados ao RIC (Simula leitura da interface E2)
-        with urllib.request.urlopen(url) as response:
+        start_time = time.time() # T0
+
+        # Ciclo de leitura e escrita
+        with urllib.request.urlopen(url, timeout=2) as response:
             data = json.loads(response.read().decode())
 
-        load = data['traffic_load_mbps']
-        status = data['status']
+        latency_ms = (time.time() - start_time()) * 1000 # T1 - T0
+        report = {
+            "id": my_id,
+            "latency_ms": latency_ms,
+            "type": "benchmark"
+        }
 
-        # 2. Toma uma decisão baseada no dado recebido
-        if status == "overload":
-            print(f"[ALERTA] Tráfego Alto ({load} Mbps)! Executando Balanceamento de Carga...")
-        else:
-            print(f"[OK] Tráfego Normal ({load} Mbps). Monitorando...")
+        data_bytes = json.dumps(report).encode('utf-8')
+        req = urllib.request.Request(url, data=data_bytes, method="POST")
+        req.add_header('Content-Type', 'application/json')
 
+        with urllib.request.urlopen(req, timeout=2) as r: pass
     except Exception as e:
-        print(f"[Erro] Falha ao conectar no RIC: {e}")
+        print(f"Erro: {e}")
 
-    # Simula o tempo de processamento no Near-RT (rápido)
-    time.sleep(2)
+    time.sleep(1) # Frequência de teste (Hz)
