@@ -26,10 +26,13 @@ spec:
     spec:
       containers:
       - name: ric
-        image: ric-base:v1
+        image: oran-lab:v1
         imagePullPolicy: IfNotPresent
-        # O comando abaixo mantem o servidor rodando e mostrando logs (-u)
-        command: ["/bin/sh", "-c", "echo 'RIC OPERANTE.'; python -u -m http.server 8080"]
+        command: ["python", "-u", "ric_mestre.py"]
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "100Mi"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -39,15 +42,15 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: xapp
+      app: xapp-functional
   template:
     metadata:
       labels:
-        app: xapp
+        app: xapp-functional
     spec:
       containers:
       - name: xapp
-        image: xapp-image:v1
+        image: oran-lab:v1
         imagePullPolicy: IfNotPresent
         command: ["python", "-u", "xapp_mock.py"]
         env:
@@ -70,9 +73,33 @@ spec:
     spec:
       containers:
       - name: rapp
-        image: rapp-image:v1
+        image: oran-lab:v1
         imagePullPolicy: IfNotPresent
         command: ["python", "-u", "rapp_mock.py"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: benchmark-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bench-worker
+  template:
+    metadata:
+      labels:
+        app: bench-worker
+    spec:
+      containers:
+      - name: worker
+        image: oran-lab:v1
+        imagePullPolicy: IfNotPresent
+        command: ["python", "-u", "app_worker.py"]
         env:
         - name: RIC_HOST
           value: "ric-service"
+        resources:
+          limits:
+            cpu: "50m"
+            memory: "50Mi"
