@@ -1,12 +1,7 @@
 import time
-import os
 
-ric_host = os.getenv('RIC_HOST', 'localhost')
-
-print(f"--- INICIANDO rApp (Non-RT) ---")
-print(f"Conectado ao RIC em: {ric_host}")
+print(f"--- rApp ENERGY SAVER (Non-RT) INICIADO")
 
 while True:
-    # Simula envio de política (ex: Desligar antenas ociosas a noite)
-    print(f"[rApp] Analisando histórico e enviando POLÍTICA DE ENERGIA via interface A1...")
+    print(f"[rApp] Analisando histórico... Política: ECONOMIA_ATIVIDADE")
     time.sleep(10)
