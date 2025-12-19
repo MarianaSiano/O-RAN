@@ -1,3 +1,4 @@
+cat <<EOF > benchmark_worker.sh
 #!/bin/bash
 echo "workers,cpu_total_m,ram_total_mi,latencia_media_ms" > resultados.csv
 echo "=== INICIANDO BENCHMARK EM ARQUITETURA COMPLETA ==="
@@ -18,8 +19,8 @@ kind load docker-image oran-lab:v1 --name oran-lab
 echo ">>> Resetando arquitetura..."
 kubectl delete -f oran-architecture.yaml --ignore-not-found=true
 kubectl apply -f oran-architecture.yaml
-echo ">>> Aguardando inicializacao (15s)..."
-sleep 15
+echo ">>> Aguardando inicializacao (30s)..."
+sleep 30
 
 # 3. Loop de Teste
 for WORKERS in 1 2 4 8 16 32 64 128
