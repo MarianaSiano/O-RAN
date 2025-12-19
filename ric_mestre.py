@@ -17,7 +17,7 @@ class TrafficHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         global POLICY_ENERGY_SAVING
         capacity = 80 if POLICY_ENERGY_SAVING else 100
-        
+
         response = {
             "load": random.randint(50, 150),
             "capacity": capacity,
@@ -26,7 +26,7 @@ class TrafficHandler(http.server.SimpleHTTPRequestHandler):
 
         self.send_response(200)
 
-        # AQUI ESTAVA O ERRO: É send_header (com R no final)
+        # CORRIGIDO AQUI: É send_header (com R no final)
         self.send_header('Content-type', 'application/json')
         self.end_headers()
         self.wfile.write(json.dumps(response).encode())
