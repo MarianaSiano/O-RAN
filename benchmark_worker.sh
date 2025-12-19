@@ -1,4 +1,3 @@
-cat <<EOF > benchmark_worker.sh
 #!/bin/bash
 echo "workers,cpu_total_m,ram_total_mi,latencia_media_ms" > resultados.csv
 echo "=== INICIANDO BENCHMARK EM ARQUITETURA COMPLETA ==="
