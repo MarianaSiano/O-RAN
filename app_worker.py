@@ -1,6 +1,6 @@
 import time
 import os
-import urllib
+import urllib.request
 import json
 import socket
 
