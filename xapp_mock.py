@@ -9,25 +9,16 @@ print(f"--- xApp TRAFFIC STEERING INICIADO ---")
 
 while True:
     try:
-        # Inicio da medicao de latencia (T0)
-        start_time = time.time()
-
         with urllib.request.urlopen(url, timeout=2) as response:
             data = json.loads(response.read().decode())
         
         util = (data['load'] / data['capacity']) * 100
         decision = "HANDOVER" if util > 100 else "KEEP"
         
-        # Envia apenas a decisao (sem logica de benchmark pesado)
-        report = {
-            "id": "xapp-traffic", 
-            "decision": decision
-        }
-
+        report = {"id": "xapp-traffic", "decision": decision}
         data_bytes = json.dumps(report).encode('utf-8')
         req = urllib.request.Request(url, data=data_bytes, method="POST")
         req.add_header('Content-Type', 'application/json')
-
         with urllib.request.urlopen(req) as r: pass
 
     except: pass
