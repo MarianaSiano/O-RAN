@@ -5,14 +5,14 @@ import json
 import threading
 
 PORT = 8080
-POLICY_ENERGY_SAVING = False
+POLICY_ENERGY_SAVING = False 
 
 class ThreadingHTTPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     daemon_threads = True
 
 class TrafficHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
-        return
+        return 
 
     def do_GET(self):
         global POLICY_ENERGY_SAVING
@@ -23,10 +23,7 @@ class TrafficHandler(http.server.SimpleHTTPRequestHandler):
             "capacity": capacity,
             "policy_active": POLICY_ENERGY_SAVING
         }
-
         self.send_response(200)
-
-        # CORRIGIDO AQUI: É send_header (com R no final)
         self.send_header('Content-type', 'application/json')
         self.end_headers()
         self.wfile.write(json.dumps(response).encode())
