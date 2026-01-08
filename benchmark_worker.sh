@@ -3,6 +3,7 @@ echo "workers,cpu_total_m,ram_total_mi,latencia_media_ms" > resultados.csv
 echo "=== INICIANDO BENCHMARK CIENTIFICO ==="
 
 # 0. GARANTIA (Roda instantaneo se ja estiver 1/1)
+# Garante que o Metrics Server aceite certificados inseguros (necessario no Kind)
 kubectl patch deployment metrics-server -n kube-system --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--kubelet-insecure-tls"}]' > /dev/null 2>&1
 kubectl rollout status deployment/metrics-server -n kube-system --timeout=10s > /dev/null 2>&1
 
@@ -16,19 +17,18 @@ sleep 20
 # 3. Loop de Teste
 for WORKERS in 1 2 4 8 16 32
 do
-    echo "------------------------------------------------"
+    echo "==========================================="
     echo ">>> Testando Nivel: $WORKERS Workers"
 
     kubectl scale deployment benchmark-worker --replicas=$WORKERS > /dev/null
     kubectl rollout status deployment/benchmark-worker --timeout=300s > /dev/null
     
-    echo "    ... Coletando metricas (60s)..."
+    echo "    === Coletando metricas (60s) ==="
     sleep 60
     
-    # --- A CORRECAO ESTA AQUI ---
-    # O BEGIN garante que as variaveis existam como 0 antes de somar.
-    # Assim, se o top vier vazio, ele imprime "0,0" em vez de ","
-    STATS=$(kubectl top pods -l app=benchmark-worker --no-headers 2>/dev/null | awk 'BEGIN {cpu=0; mem=0} {cpu+=$2; mem+=$3} END {print cpu "," mem}')
+    # --- CORREÇÃO AQUI ---
+    # Mudado de 'app=benchmark-worker' para 'app=bench-worker' (como esta no YAML)
+    STATS=$(kubectl top pods -l app=bench-worker --no-headers 2>/dev/null | awk 'BEGIN {cpu=0; mem=0} {cpu+=$2; mem+=$3} END {print cpu "," mem}')
     
     # Trava extra de seguranca
     if [ -z "$STATS" ] || [ "$STATS" == "," ]; then STATS="0,0"; fi
@@ -45,4 +45,5 @@ do
     echo "    >>> RESULTADO: CPU/RAM: $STATS | Latencia: $LATENCY ms"
     echo "$WORKERS,$STATS,$LATENCY" >> resultados.csv
 done
+
 echo "=== FIM. Dados salvos em 'resultados.csv' ==="
