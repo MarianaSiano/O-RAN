@@ -12,11 +12,11 @@ sleep 60
 
 # 1. Build da Imagem (Garante que existe localmente)
 echo ">>> Construindo imagem..."
-# Tenta buildar, se falhar usa imagem dummy para nao travar o teste se nao tiver Dockerfile
+# Tenta buildar, se falhar usa imagem dummy para nao travar o teste
 docker build -t oran-lab:v1 -f Dockerfile . 2>/dev/null || echo "Aviso: Dockerfile nao encontrado, usando imagem padrao se necessario."
 kind load docker-image oran-lab:v1 --name oran-lab 2>/dev/null
 
-# 2. Reset do Cluster (Aplica o arquivo YAML que deve estar na pasta)
+# 2. Reset do Cluster
 echo ">>> Resetando arquitetura..."
 kubectl delete -f oran-architecture.yaml --ignore-not-found=true
 kubectl apply -f oran-architecture.yaml
@@ -35,9 +35,10 @@ do
     # Aguarda o rollout terminar
     kubectl rollout status deployment/benchmark-worker --timeout=300s > /dev/null
 
-    echo "    ... Coletando metricas (30s)..."
-    sleep 30
+    echo "    === Coletando metricas (60s) ==="
+    sleep 60
 
+    # Coleta de metricas (CPU/RAM)
     STATS=$(kubectl top pods -l app=benchmark-worker --no-headers 2>/dev/null | awk '{cpu+=$2; mem+=$3} END {print cpu "," mem}')
 
     # Se o metrics server falhar, define como 0 para não quebrar o script
