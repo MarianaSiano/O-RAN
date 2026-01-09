@@ -5,19 +5,20 @@ import matplotlib.pyplot as plt
 try:
     df = pd.read_csv('resultados.csv')
     print("Dados carregados com sucesso.")
+    print(df) # Mostra no terminal para conferencia
 except:
     print("Erro: Arquivo 'resultados.csv' não encontrado.")
     exit()
 
 # --- GRAFICO 1: CPU ---
-plt.figure(figsize=(8, 6)) # Cria uma nova figura
+plt.figure(figsize=(8, 6))
 plt.plot(df['workers'], df['cpu_total_m'], marker='o', color='tab:blue', linewidth=2)
 plt.title('Consumo Total de CPU')
 plt.xlabel('Número de Workers')
 plt.ylabel('CPU (mCore)')
 plt.grid(True, linestyle='--')
 plt.savefig('grafico_cpu.png')
-plt.close() # Limpa a memoria para o proximo
+plt.close()
 print(">>> Salvo: grafico_cpu.png")
 
 # --- GRAFICO 2: RAM ---
