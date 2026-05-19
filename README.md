@@ -85,3 +85,36 @@ No rApp você verá:
 Policy alternando a cada 2s sem controle legitimo
 Capacity caindo para 50 sem autorizacao
 ````
+
+## Para gerar o dataset
+
+````bash
+python3 gerar_dataset_ataque.py
+````
+
+### Saída esperada
+
+````bash
+[+] Dataset gerado: oran_attack_dataset.csv
+    Total: 600 registros
+    Normal (attack_id=0): 420
+    Ataque 1 - OVERLOAD_FABRICATE: 180
+    Ataque 2 - ENERGY_POLICY_INJECTION: 60
+
+--- Timeline dos Ataques ---
+  0-179:  NORMAL (3 min)
+ 180-359: ATAQUE 1 - OVERLOAD_FABRICATE (3 min)
+ 360-539: NORMAL (3 min)
+ 540-599: ATAQUE 2 - ENERGY_POLICY_INJECTION + LATENCY POISON (1 min)
+````
+
+### O dataset contém
+
+| Coluna | Descrição | No ataque |
+| :--- | :--- | :--- |
+| `cell_load_mbps` | Carga da célula | **>210** (falso, impossível) |
+| `connected_users` | Usuários conectados | **8-20** (inconsistente com load alto) |
+| `xapp_decision` | Decisão do xApp | **HANDOVER** forçado |
+| `a1_policy_value` | Política A1 do rApp | Alternando **True/False** sem padrão |
+| `worker0_latency_ms` | Latência worker 0 | **>500ms** (envenenado) |
+| `is_attack` | Flag de ataque | 1 = ataque, 0 = normal |
