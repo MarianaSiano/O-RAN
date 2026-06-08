@@ -71,3 +71,50 @@ def tecnica1_adversarial_noise():
         except Exception as e:
             print(f"[IDS-T1:Adversarial] Erro: {e}")
             time.sleep(1)
+
+# ============================================================
+# TECNICA 2: GRADIENT MASKING (xApp)
+# ============================================================
+
+def tecnica2_gradient_masking():
+    """Engana detecção baseada em gradiente - 70% normal, 30% sutil"""
+    time.sleep(5)
+    while True:
+        try:
+            if random.random() < 0.7:
+                # Totalmente normal
+                load = round(random.gauss(REF_LOAD_MEAN, REF_LOAD_STD), 1)
+                users = int(random.gauss(REF_USERS_MEAN, REF_USERS_STD))
+                lat = round(random.gauss(REF_LAT_MEAN, REF_LAT_STD), 2)
+                status = "normal"
+            else:
+                # Anomalia sutil - dentro de 2.0 std (limiar do detectar)
+                load = round(REF_LOAD_MEAN + random.uniform(1.5, 2.0) * REF_LOAD_STD, 1)
+                users = max(5, int(REF_USERS_MEAN - random.uniform(1.2, 1.8) * REF_USERS_STD))
+                lat = round(REF_LAT_MEAN + random.uniform(0.5, 1.5) * REF_LAT_STD, 2)
+                status = "normal"  # MASCARA como normal!
+
+            ataque = {
+                "id": f"mask-worker-{random.randint(1, 20)}",
+                "latency_ms": lat,
+                "type": "benchmark",
+                "cell_load_mbps": load,
+                "cell_capacity_mbps": 100,
+                "connected_users": users,
+                "status": status,
+                "temperature_bbu": round(42 + random.gauss(0, 1.5), 1)
+            }
+
+            data = json.dumps(ataque).encode()
+            req = urllib.request.Request(BASE_URL, data=data, method="POST")
+            req.add_header('Content-Type', 'application/json')
+            with urllib.request.urlopen(req, timeout=2): 
+                pass
+            time.sleep(0.5)
+        except Exception as e:
+            print(f"[IDS-T2:Gradient] Erro: {e}")
+            time.sleep(1)
+
+# ============================================================
+# TECNICA 3: DATA CAMOUFLAGE (rApp)
+# ============================================================
