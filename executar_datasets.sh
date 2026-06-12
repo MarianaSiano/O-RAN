@@ -1,0 +1,2 @@
+python3 gerar_dataset_xapp.py
+python3 gerar_dataset_rapp.py
