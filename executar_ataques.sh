@@ -1,8 +1,0 @@
-python3 ataque_ids_evasion.py
-python3 ataque_forca_bruta.py
-python3 ataque_overload_fabricate.py
-python3 ataque_latency_poison.py
-python3 ataque_handover_storm.py
-python3 ataque_energy_policy_injection.py
-python3 ataque_resource_drain.py
-python3 ataque_policy_confusion.py
